@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceArea } from "recharts";
 
 // ── Storage ──
 const STORAGE_KEY = "health-tracker-data";
@@ -587,8 +587,8 @@ export default function HealthTracker() {
                         />
                         <YAxis domain={[40, 200]} tick={{ fontSize: 14, fill: "#888" }} tickMargin={4} />
                         <Tooltip content={<CustomTooltip />} />
-                        <ReferenceLine y={140} stroke="#f44336" strokeDasharray="6 4" strokeWidth={2} label={{ value: "高血圧基準", fill: "#f44336", fontSize: 13, position: "right" }} />
-                        <ReferenceLine y={90} stroke="#ff9800" strokeDasharray="6 4" strokeWidth={1.5} />
+                        <ReferenceArea y1={140} y2={200} fill="#f44336" fillOpacity={0.06} />
+                        <ReferenceArea y1={90} y2={200} fill="#ff9800" fillOpacity={0.04} />
                         <Line type="monotone" dataKey="最高" stroke="#e53935" strokeWidth={3} dot={{ r: 5, fill: "#e53935" }} activeDot={{ r: 8 }} connectNulls={true} />
                         <Line type="monotone" dataKey="最低" stroke="#1e88e5" strokeWidth={3} dot={{ r: 5, fill: "#1e88e5" }} activeDot={{ r: 8 }} connectNulls={true} />
                         <Line type="monotone" dataKey="脈拍" stroke="#ff9800" strokeWidth={2} dot={{ r: 4, fill: "#ff9800" }} strokeDasharray="5 3" connectNulls={true} />
@@ -601,6 +601,18 @@ export default function HealthTracker() {
                         <div style={{ width: 14, height: 14, borderRadius: 7, background: i.c }} />{i.l}
                       </div>
                     ))}
+                  </div>
+                  {/* BP reference annotations */}
+                  <div style={{ marginTop: 14, padding: "12px 14px", background: "#f8f9fa", borderRadius: 14, fontSize: 15, lineHeight: 1.8 }}>
+                    <div style={{ fontWeight: 700, color: "#555", marginBottom: 4 }}>📋 グラフの色付き領域について</div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <div style={{ width: 20, height: 14, borderRadius: 4, background: "rgba(244,67,54,0.15)", flexShrink: 0 }} />
+                      <span style={{ color: "#666" }}><strong style={{ color: "#f44336" }}>赤い領域</strong>：最高血圧 140 mmHg 以上（高血圧基準）</span>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 4 }}>
+                      <div style={{ width: 20, height: 14, borderRadius: 4, background: "rgba(255,152,0,0.12)", flexShrink: 0 }} />
+                      <span style={{ color: "#666" }}><strong style={{ color: "#ff9800" }}>黄色い領域</strong>：最低血圧 90 mmHg 以上（高血圧基準）</span>
+                    </div>
                   </div>
                 </>
               )}
