@@ -26,8 +26,18 @@ jobs:
         with:
           node-version: 20
 
-      - run: npm install
-      - run: npm run build
+      - name: Clean install
+        run: |
+          rm -rf node_modules
+          npm install --legacy-peer-deps
+
+      - name: Build
+        run: |
+          npx vite build --debug 2>&1 || true
+          npx vite build
+          echo "--- Build output ---"
+          ls -la dist/
+          ls -la dist/assets/
 
       - uses: actions/configure-pages@v4
       - uses: actions/upload-pages-artifact@v3
