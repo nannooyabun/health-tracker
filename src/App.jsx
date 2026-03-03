@@ -476,7 +476,7 @@ export default function HealthTracker() {
                 <BPInput value={systolic} onChange={setSystolic} min={60} max={250} label="最高血圧" unit="mmHg" accentColor="#e53935" bgColor="#ffebee" />
                 <div style={{ fontSize: 36, fontWeight: 300, color: "#ccc", paddingTop: 68 }}>/</div>
                 <BPInput value={diastolic} onChange={setDiastolic} min={30} max={180} label="最低血圧" unit="mmHg" accentColor="#1e88e5" bgColor="#e3f2fd" />
-                <BPInput value={pulse} onChange={setPulse} min={30} max={200} label="脈拍" unit="bpm" accentColor="#009688" bgColor="#fff3e0" />
+                <BPInput value={pulse} onChange={setPulse} min={30} max={200} label="脈拍" unit="bpm" accentColor="#009688" bgColor="#e0f2f1" />
               </div>
               <button onClick={saveBP} style={{
                 width: "100%", padding: "20px", borderRadius: 18, border: "none", fontSize: 24, fontWeight: 800,
@@ -552,7 +552,7 @@ export default function HealthTracker() {
                     <div style={{ fontSize: 28, fontWeight: 800, color: avgCat.color }}>{avgCat.text}</div>
                   </div>
                   <div style={{ display: "flex", gap: 10, marginBottom: 12 }}>
-                    {[{ l: "最高血圧", v: avgSys, c: "#e53935", bg: "#fce4ec", u: "mmHg" }, { l: "最低血圧", v: avgDia, c: "#1e88e5", bg: "#e3f2fd", u: "mmHg" }, { l: "脈拍", v: avgPulse, c: "#009688", bg: "#fff3e0", u: "bpm" }].map((i) => (
+                    {[{ l: "最高血圧", v: avgSys, c: "#e53935", bg: "#fce4ec", u: "mmHg" }, { l: "最低血圧", v: avgDia, c: "#1e88e5", bg: "#e3f2fd", u: "mmHg" }, { l: "脈拍", v: avgPulse, c: "#009688", bg: "#e0f2f1", u: "bpm" }].map((i) => (
                       <div key={i.l} style={{ flex: 1, background: i.bg, borderRadius: 16, padding: "16px 8px", textAlign: "center" }}>
                         <div style={{ fontSize: 13, color: "#999", marginBottom: 4 }}>{i.l}</div>
                         <div style={{ fontSize: 34, fontWeight: 800, color: i.c }}>{i.v}</div>
