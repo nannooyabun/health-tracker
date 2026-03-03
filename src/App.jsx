@@ -29,6 +29,10 @@ function parseDate(val) {
   const s = String(val).trim();
   let m = s.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})$/);
   if (m) return ds(+m[1], +m[2] - 1, +m[3]);
+  m = s.match(/^(\d{4})年(\d{1,2})月(\d{1,2})日$/);
+  if (m) return ds(+m[1], +m[2] - 1, +m[3]);
+  m = s.match(/^(\d{1,2})月(\d{1,2})日$/);
+  if (m) return ds(new Date().getFullYear(), +m[1] - 1, +m[2]);
   m = s.match(/^(\d{1,2})[\/\-](\d{1,2})$/);
   if (m) return ds(new Date().getFullYear(), +m[1] - 1, +m[2]);
   return null;
