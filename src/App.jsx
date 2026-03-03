@@ -254,10 +254,11 @@ function CalendarView({ records, onDateTap }) {
 // ── Custom Tooltip ──
 function CustomTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null;
+  const dateLabel = typeof label === "number" ? (() => { const d = new Date(label); return `${d.getMonth() + 1}月${d.getDate()}日`; })() : label;
   return (
     <div style={{ background: "white", borderRadius: 12, padding: "12px 16px", boxShadow: "0 4px 20px rgba(0,0,0,0.15)", fontSize: 16 }}>
-      <p style={{ margin: 0, fontWeight: 700, marginBottom: 6 }}>{label}</p>
-      {payload.map((p, i) => (<p key={i} style={{ margin: "2px 0", color: p.color, fontWeight: 600 }}>{p.name}: {p.value} {p.name === "脈拍" ? "bpm" : "mmHg"}</p>))}
+      <p style={{ margin: 0, fontWeight: 700, marginBottom: 6 }}>{dateLabel}</p>
+      {payload.filter((p) => p.value !== null).map((p, i) => (<p key={i} style={{ margin: "2px 0", color: p.color, fontWeight: 600 }}>{p.name}: {p.value} {p.name === "脈拍" ? "bpm" : "mmHg"}</p>))}
     </div>
   );
 }
@@ -352,24 +353,33 @@ export default function HealthTracker() {
     newData.records[editDate] = rec; persist(newData);
   };
 
-  // Chart data filtered by unified range
+  // Chart data: include ALL dates in range for proper time-axis spacing
   const chartData = (() => {
     if (!data) return [];
-    return Object.keys(data.records)
-      .filter((d) => data.records[d]?.bp && d >= rangeStart && d <= rangeEnd)
-      .sort()
-      .map((d) => ({
-        date: formatDateLabel(d), fullDate: d,
-        最高: data.records[d].bp.systolic, 最低: data.records[d].bp.diastolic, 脈拍: data.records[d].bp.pulse,
-      }));
+    const result = [];
+    const start = new Date(rangeStart + "T00:00:00");
+    const end = new Date(rangeEnd + "T00:00:00");
+    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+      const key = ds(d.getFullYear(), d.getMonth(), d.getDate());
+      const rec = data.records[key]?.bp;
+      result.push({
+        timestamp: new Date(key + "T00:00:00").getTime(),
+        date: formatDateLabel(key),
+        fullDate: key,
+        最高: rec ? rec.systolic : null,
+        最低: rec ? rec.diastolic : null,
+        脈拍: rec ? rec.pulse : null,
+      });
+    }
+    return result;
   })();
 
-  // Average stats
-  const avgEntries = chartData;
-  const avgCount = avgEntries.length;
-  const avgSys = avgCount ? Math.round(avgEntries.reduce((s, e) => s + e["最高"], 0) / avgCount) : null;
-  const avgDia = avgCount ? Math.round(avgEntries.reduce((s, e) => s + e["最低"], 0) / avgCount) : null;
-  const avgPulse = avgCount ? Math.round(avgEntries.reduce((s, e) => s + (e["脈拍"] || 0), 0) / avgCount) : null;
+  // Entries with actual data (for averages)
+  const dataEntries = chartData.filter((d) => d["最高"] !== null);
+  const avgCount = dataEntries.length;
+  const avgSys = avgCount ? Math.round(dataEntries.reduce((s, e) => s + e["最高"], 0) / avgCount) : null;
+  const avgDia = avgCount ? Math.round(dataEntries.reduce((s, e) => s + e["最低"], 0) / avgCount) : null;
+  const avgPulse = avgCount ? Math.round(dataEntries.reduce((s, e) => s + (e["脈拍"] || 0), 0) / avgCount) : null;
   const avgCat = bpLevel(avgSys || 0);
 
   if (loading) {
@@ -558,7 +568,7 @@ export default function HealthTracker() {
             {/* Chart */}
             <div style={{ background: "white", borderRadius: 24, padding: "24px 16px", boxShadow: "0 2px 16px rgba(0,0,0,0.06)" }}>
               <div style={{ fontSize: 22, fontWeight: 800, color: "#1a1a2e", marginBottom: 16 }}>📈 血圧の推移</div>
-              {chartData.length === 0 ? (
+              {avgCount === 0 ? (
                 <div style={{ textAlign: "center", padding: "60px 20px", color: "#bbb", fontSize: 20 }}>📝 この期間のデータがありません</div>
               ) : (
                 <>
@@ -566,14 +576,22 @@ export default function HealthTracker() {
                     <ResponsiveContainer>
                       <LineChart data={chartData} margin={{ top: 10, right: 10, left: -10, bottom: 5 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                        <XAxis dataKey="date" tick={{ fontSize: 14, fill: "#888" }} tickMargin={8} />
+                        <XAxis
+                          dataKey="timestamp"
+                          type="number"
+                          scale="time"
+                          domain={["dataMin", "dataMax"]}
+                          tickFormatter={(ts) => { const d = new Date(ts); return `${d.getMonth() + 1}/${d.getDate()}`; }}
+                          tick={{ fontSize: 13, fill: "#888" }}
+                          tickMargin={8}
+                        />
                         <YAxis domain={[40, 200]} tick={{ fontSize: 14, fill: "#888" }} tickMargin={4} />
                         <Tooltip content={<CustomTooltip />} />
                         <ReferenceLine y={140} stroke="#f44336" strokeDasharray="6 4" strokeWidth={2} label={{ value: "高血圧基準", fill: "#f44336", fontSize: 13, position: "right" }} />
                         <ReferenceLine y={90} stroke="#ff9800" strokeDasharray="6 4" strokeWidth={1.5} />
-                        <Line type="monotone" dataKey="最高" stroke="#e53935" strokeWidth={3} dot={{ r: 5, fill: "#e53935" }} activeDot={{ r: 8 }} />
-                        <Line type="monotone" dataKey="最低" stroke="#1e88e5" strokeWidth={3} dot={{ r: 5, fill: "#1e88e5" }} activeDot={{ r: 8 }} />
-                        <Line type="monotone" dataKey="脈拍" stroke="#ff9800" strokeWidth={2} dot={{ r: 4, fill: "#ff9800" }} strokeDasharray="5 3" />
+                        <Line type="monotone" dataKey="最高" stroke="#e53935" strokeWidth={3} dot={{ r: 5, fill: "#e53935" }} activeDot={{ r: 8 }} connectNulls={false} />
+                        <Line type="monotone" dataKey="最低" stroke="#1e88e5" strokeWidth={3} dot={{ r: 5, fill: "#1e88e5" }} activeDot={{ r: 8 }} connectNulls={false} />
+                        <Line type="monotone" dataKey="脈拍" stroke="#ff9800" strokeWidth={2} dot={{ r: 4, fill: "#ff9800" }} strokeDasharray="5 3" connectNulls={false} />
                       </LineChart>
                     </ResponsiveContainer>
                   </div>
