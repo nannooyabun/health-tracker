@@ -471,7 +471,7 @@ export default function HealthTracker() {
             borderRadius: 16, padding: "8px 16px", cursor: "pointer",
             display: "flex", alignItems: "center", gap: 8, WebkitTapHighlightColor: "transparent", flex: 1,
           }}>
-            <span style={{ fontSize: 22, fontWeight: 900, color: "white", letterSpacing: 2 }}>{formatDateFull(editDate)}</span>
+            <span style={{ fontSize: 20, fontWeight: 900, color: "white", letterSpacing: 1 }}>{formatDateFull(editDate)}</span>
             <span style={{ fontSize: 16, color: "rgba(255,255,255,0.7)" }}>▼</span>
           </button>
           <div style={{ display: "flex", borderRadius: 14, overflow: "hidden", border: "2px solid rgba(255,255,255,0.3)" }}>
