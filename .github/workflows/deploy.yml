@@ -26,18 +26,21 @@ jobs:
         with:
           node-version: 20
 
-      - name: Clean install
+      - name: Install and build
         run: |
-          rm -rf node_modules
+          cat package.json
+          cat vite.config.js
+          rm -rf node_modules dist
           npm install --legacy-peer-deps
-
-      - name: Build
-        run: |
-          npx vite build --debug 2>&1 || true
+          echo "--- node_modules check ---"
+          ls node_modules/react/package.json && echo "react OK" || echo "react MISSING"
+          ls node_modules/react-dom/package.json && echo "react-dom OK" || echo "react-dom MISSING"
+          ls node_modules/recharts/package.json && echo "recharts OK" || echo "recharts MISSING"
+          echo "--- building ---"
           npx vite build
-          echo "--- Build output ---"
-          ls -la dist/
+          echo "--- dist output ---"
           ls -la dist/assets/
+          wc -c dist/assets/*.js
 
       - uses: actions/configure-pages@v4
       - uses: actions/upload-pages-artifact@v3
