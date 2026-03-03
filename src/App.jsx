@@ -476,7 +476,7 @@ export default function HealthTracker() {
                 <BPInput value={systolic} onChange={setSystolic} min={60} max={250} label="最高血圧" unit="mmHg" accentColor="#e53935" bgColor="#ffebee" />
                 <div style={{ fontSize: 36, fontWeight: 300, color: "#ccc", paddingTop: 68 }}>/</div>
                 <BPInput value={diastolic} onChange={setDiastolic} min={30} max={180} label="最低血圧" unit="mmHg" accentColor="#1e88e5" bgColor="#e3f2fd" />
-                <BPInput value={pulse} onChange={setPulse} min={30} max={200} label="脈拍" unit="bpm" accentColor="#ff9800" bgColor="#fff3e0" />
+                <BPInput value={pulse} onChange={setPulse} min={30} max={200} label="脈拍" unit="bpm" accentColor="#009688" bgColor="#fff3e0" />
               </div>
               <button onClick={saveBP} style={{
                 width: "100%", padding: "20px", borderRadius: 18, border: "none", fontSize: 24, fontWeight: 800,
@@ -552,7 +552,7 @@ export default function HealthTracker() {
                     <div style={{ fontSize: 28, fontWeight: 800, color: avgCat.color }}>{avgCat.text}</div>
                   </div>
                   <div style={{ display: "flex", gap: 10, marginBottom: 12 }}>
-                    {[{ l: "最高血圧", v: avgSys, c: "#e53935", bg: "#fce4ec", u: "mmHg" }, { l: "最低血圧", v: avgDia, c: "#1e88e5", bg: "#e3f2fd", u: "mmHg" }, { l: "脈拍", v: avgPulse, c: "#ff9800", bg: "#fff3e0", u: "bpm" }].map((i) => (
+                    {[{ l: "最高血圧", v: avgSys, c: "#e53935", bg: "#fce4ec", u: "mmHg" }, { l: "最低血圧", v: avgDia, c: "#1e88e5", bg: "#e3f2fd", u: "mmHg" }, { l: "脈拍", v: avgPulse, c: "#009688", bg: "#fff3e0", u: "bpm" }].map((i) => (
                       <div key={i.l} style={{ flex: 1, background: i.bg, borderRadius: 16, padding: "16px 8px", textAlign: "center" }}>
                         <div style={{ fontSize: 13, color: "#999", marginBottom: 4 }}>{i.l}</div>
                         <div style={{ fontSize: 34, fontWeight: 800, color: i.c }}>{i.v}</div>
@@ -591,12 +591,12 @@ export default function HealthTracker() {
                         <ReferenceArea y1={90} y2={200} fill="#ff9800" fillOpacity={0.04} />
                         <Line type="monotone" dataKey="最高" stroke="#e53935" strokeWidth={3} dot={{ r: 5, fill: "#e53935" }} activeDot={{ r: 8 }} connectNulls={true} />
                         <Line type="monotone" dataKey="最低" stroke="#1e88e5" strokeWidth={3} dot={{ r: 5, fill: "#1e88e5" }} activeDot={{ r: 8 }} connectNulls={true} />
-                        <Line type="monotone" dataKey="脈拍" stroke="#ff9800" strokeWidth={2} dot={{ r: 4, fill: "#ff9800" }} strokeDasharray="5 3" connectNulls={true} />
+                        <Line type="monotone" dataKey="脈拍" stroke="#009688" strokeWidth={2} dot={{ r: 4, fill: "#009688" }} strokeDasharray="5 3" connectNulls={true} />
                       </LineChart>
                     </ResponsiveContainer>
                   </div>
                   <div style={{ display: "flex", justifyContent: "center", gap: 20, marginTop: 12, flexWrap: "wrap" }}>
-                    {[{ l: "最高血圧", c: "#e53935" }, { l: "最低血圧", c: "#1e88e5" }, { l: "脈拍", c: "#ff9800" }].map((i) => (
+                    {[{ l: "最高血圧", c: "#e53935" }, { l: "最低血圧", c: "#1e88e5" }, { l: "脈拍", c: "#009688" }].map((i) => (
                       <div key={i.l} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 16, fontWeight: 600, color: i.c }}>
                         <div style={{ width: 14, height: 14, borderRadius: 7, background: i.c }} />{i.l}
                       </div>
@@ -650,7 +650,7 @@ export default function HealthTracker() {
                         <span style={{ fontSize: 18, color: "#ccc" }}>/</span>
                         <span style={{ fontSize: 26, fontWeight: 800, color: "#1e88e5" }}>{rec.bp.diastolic}</span>
                         <span style={{ fontSize: 14, color: "#999" }}>mmHg</span>
-                        {rec.bp.pulse && (<><span style={{ fontSize: 15, color: "#888", marginLeft: 6 }}>💓</span><span style={{ fontSize: 26, fontWeight: 800, color: "#ff9800" }}>{rec.bp.pulse}</span><span style={{ fontSize: 14, color: "#999" }}>bpm</span></>)}
+                        {rec.bp.pulse && (<><span style={{ fontSize: 15, color: "#888", marginLeft: 6 }}>💓</span><span style={{ fontSize: 26, fontWeight: 800, color: "#009688" }}>{rec.bp.pulse}</span><span style={{ fontSize: 14, color: "#999" }}>bpm</span></>)}
                       </div>
                     )}
                     <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center", marginBottom: rec.memo ? 8 : 0 }}>
