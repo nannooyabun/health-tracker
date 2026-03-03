@@ -589,9 +589,9 @@ export default function HealthTracker() {
                         <Tooltip content={<CustomTooltip />} />
                         <ReferenceLine y={140} stroke="#f44336" strokeDasharray="6 4" strokeWidth={2} label={{ value: "高血圧基準", fill: "#f44336", fontSize: 13, position: "right" }} />
                         <ReferenceLine y={90} stroke="#ff9800" strokeDasharray="6 4" strokeWidth={1.5} />
-                        <Line type="monotone" dataKey="最高" stroke="#e53935" strokeWidth={3} dot={{ r: 5, fill: "#e53935" }} activeDot={{ r: 8 }} connectNulls={false} />
-                        <Line type="monotone" dataKey="最低" stroke="#1e88e5" strokeWidth={3} dot={{ r: 5, fill: "#1e88e5" }} activeDot={{ r: 8 }} connectNulls={false} />
-                        <Line type="monotone" dataKey="脈拍" stroke="#ff9800" strokeWidth={2} dot={{ r: 4, fill: "#ff9800" }} strokeDasharray="5 3" connectNulls={false} />
+                        <Line type="monotone" dataKey="最高" stroke="#e53935" strokeWidth={3} dot={{ r: 5, fill: "#e53935" }} activeDot={{ r: 8 }} connectNulls={true} />
+                        <Line type="monotone" dataKey="最低" stroke="#1e88e5" strokeWidth={3} dot={{ r: 5, fill: "#1e88e5" }} activeDot={{ r: 8 }} connectNulls={true} />
+                        <Line type="monotone" dataKey="脈拍" stroke="#ff9800" strokeWidth={2} dot={{ r: 4, fill: "#ff9800" }} strokeDasharray="5 3" connectNulls={true} />
                       </LineChart>
                     </ResponsiveContainer>
                   </div>
