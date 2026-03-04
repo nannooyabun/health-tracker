@@ -311,7 +311,7 @@ export default function HealthTracker() {
   useEffect(()=>{
     const ld=loadData(); const d=ld||defState(); let mg=false;
     Object.keys(d.records).forEach(dt=>{const r=d.records[dt];if(r.bp&&!r.am&&!r.pm){r.am={...r.bp};delete r.bp;mg=true;}});
-    setData(d); if(mg) saveData(d); ldRec(d,todayStr(),"am"); setLoading(false);
+    setData(d); if(mg) saveData(d); const autoSlot = (() => { const h = new Date().getHours(); return (h >= 4 && h < 16) ? "am" : "pm"; })(); setSlot(autoSlot); ldRec(d, todayStr(), autoSlot); setLoading(false);
   },[]);
 
   const ldRec=(d,dt,sl)=>{const r=d.records[dt],bp=r?.[sl]; if(bp){sSys(bp.systolic);sDia(bp.diastolic);sPls(bp.pulse||70);sMTime(bp.time||nowTime());}else{sSys(130);sDia(80);sPls(70);sMTime(nowTime());} sMemo(r?.memo||"");};
@@ -396,7 +396,14 @@ export default function HealthTracker() {
             <div style={{ fontSize:13,color:T.sT,marginBottom:10 }}>▲▼ or 数値タップで入力（タップ時クリア）</div>
             <div style={{ display:"flex",alignItems:"center",gap:10,marginBottom:12 }}>
               <span style={{ fontSize:15,fontWeight:600,color:T.sT }}>⏰ 測定時刻</span>
-              <input type="time" value={mTime} onChange={e=>sMTime(e.target.value)} style={{ fontSize:18,fontWeight:700,padding:"5px 10px",borderRadius:10,border:`2px solid ${T.bC}`,outline:"none",background:T.iBg,fontFamily:"'Noto Sans JP',sans-serif",color:T.cTx }}/>
+              <input type="time" value={mTime} onChange={e=>sMTime(e.target.value)} onBlur={e=>{
+                const v=e.target.value; if(!v)return;
+                const h=parseInt(v.split(":")[0]);
+                const shouldBe=(h>=4&&h<16)?"am":"pm";
+                if(shouldBe!==slot){
+                  const msg=shouldBe==="am"?"朝モードに切り替えますか？":"夜モードに切り替えますか？";
+                  if(window.confirm(`⏰ 時刻が${v}です。${msg}`)) swSlot(shouldBe);
+              } }} style value={mTime} onChange={e=>sMTime(e.target.value)} style={{ fontSize:18,fontWeight:700,padding:"5px 10px",borderRadius:10,border:`2px solid ${T.bC}`,outline:"none",background:T.iBg,fontFamily:"'Noto Sans JP',sans-serif",color:T.cTx }}/>
             </div>
             <div style={{ textAlign:"center",marginBottom:12,padding:"7px 12px",borderRadius:12,background:lv.bg }}>
               <span style={{ fontSize:17,fontWeight:800,color:lv.color }}>{lv.text}</span>
