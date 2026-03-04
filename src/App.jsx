@@ -365,7 +365,7 @@ export default function HealthTracker() {
   return (
     <div style={{ minHeight:"100vh",background:T.pBg,fontFamily:"'Noto Sans JP',sans-serif",paddingBottom:100,transition:"background 0.4s" }}>
       <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
-      {showDP&&<MiniCal value={editDate} onChange={d=>{navToDate(d);sTab("today");}} onClose={()=>sShowDP(false)} records={data.records}/>}
+      {showDP&&<MiniCal value={editDate} onChange={d=>{   if(tab==="today") swDate(d); else {navToDate(d);sTab("today");} }} onClose={()=>sShowDP(false)} records={data.records}/>}
       {showRP&&<RangeCal startDate={cS} endDate={cE} onS={sCS} onE={sCE} onClose={()=>sShowRP(false)}/>}
       {showImp&&<ImportDlg onClose={()=>sShowImp(false)} onImport={doImport}/>}
 
