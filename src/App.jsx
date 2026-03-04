@@ -315,13 +315,22 @@ export default function HealthTracker() {
   },[]);
 
   const ldRec=(d,dt,sl)=>{const r=d.records[dt],bp=r?.[sl]; if(bp){sSys(bp.systolic);sDia(bp.diastolic);sPls(bp.pulse||70);sMTime(bp.time||nowTime());}else{sSys(130);sDia(80);sPls(70);sMTime(nowTime());} sMemo(r?.memo||"");};
-  const swDate=dt=>{setEditDate(dt);if(data)ldRec(data,dt,slot);};
-  const swSlot=sl=>{setSlot(sl);if(data)ldRec(data,editDate,sl);};
+  const swDate=dt=>{setEditDate(dt);};
+  const swSlot=sl=>{setSlot(sl);};
+  const navToDate=(dt)=>{setEditDate(dt);if(data)ldRec(data,dt,slot);};
   const persist=useCallback(nd=>{setData(nd);saveData(nd);},[]);
   const eRec=data?.records[editDate]||{};
 
   const togMed=mn=>{const nd={...data,records:{...data.records}};const r={...(nd.records[editDate]||{})};const ms={...(r.meds||{})};ms[mn]=!ms[mn];r.meds=ms;nd.records[editDate]=r;persist(nd);};
-  const saveBP=()=>{const nd={...data,records:{...data.records}};const r={...(nd.records[editDate]||{})};r[slot]={systolic:sys,diastolic:dia,pulse:pls,time:mTime};r.memo=memo;nd.records[editDate]=r;persist(nd);sSaved(true);setTimeout(()=>sSaved(false),2000);};
+  const saveBP=()=>{
+    const existing=data?.records[editDate]?.[slot];
+    if(existing){
+      const slotLabel=slot==="am"?"朝":"夜";
+      const msg=`⚠️ ${fmtFull(editDate)} ${slotLabel}の記録を上書きしますか？\n\n既存: ${existing.systolic}/${existing.diastolic} 脈拍${existing.pulse||0}\n今回: ${sys}/${dia} 脈拍${pls}`;
+      if(!window.confirm(msg)) return;
+    }
+    const nd={...data,records:{...data.records}};const r={...(nd.records[editDate]||{})};r[slot]={systolic:sys,diastolic:dia,pulse:pls,time:mTime};r.memo=memo;nd.records[editDate]=r;persist(nd);sSaved(true);setTimeout(()=>sSaved(false),2000);
+  };
   const saveMemo=()=>{const nd={...data,records:{...data.records}};const r={...(nd.records[editDate]||{})};r.memo=memo;nd.records[editDate]=r;persist(nd);};
 
   const doImport=(entries,overwrite)=>{const nd={...data,records:{...data.records}};for(const e of entries){if(!e.date||!e.sys)continue;const r={...(nd.records[e.date]||{})};if(!overwrite&&r[e.slot])continue;r[e.slot]={systolic:e.sys,diastolic:e.dia||0,pulse:e.pls||0,time:""};nd.records[e.date]=r;}persist(nd);};
@@ -356,7 +365,7 @@ export default function HealthTracker() {
   return (
     <div style={{ minHeight:"100vh",background:T.pBg,fontFamily:"'Noto Sans JP',sans-serif",paddingBottom:100,transition:"background 0.4s" }}>
       <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
-      {showDP&&<MiniCal value={editDate} onChange={d=>{swDate(d);sTab("today");}} onClose={()=>sShowDP(false)} records={data.records}/>}
+      {showDP&&<MiniCal value={editDate} onChange={d=>{navToDate(d);sTab("today");}} onClose={()=>sShowDP(false)} records={data.records}/>}
       {showRP&&<RangeCal startDate={cS} endDate={cE} onS={sCS} onE={sCE} onClose={()=>sShowRP(false)}/>}
       {showImp&&<ImportDlg onClose={()=>sShowImp(false)} onImport={doImport}/>}
 
@@ -388,7 +397,7 @@ export default function HealthTracker() {
         {tab==="today"&&<>
           {!isT&&<div style={{ background:"#fff3e0",borderRadius:16,padding:"10px 16px",marginBottom:12,display:"flex",justifyContent:"space-between",alignItems:"center" }}>
             <span style={{ fontSize:15,fontWeight:700,color:"#e65100" }}>📝 {fmtFull(editDate)} を編集中</span>
-            <button onClick={()=>swDate(today)} style={{ fontSize:13,padding:"5px 10px",borderRadius:10,border:"none",background:T.ac,color:"white",fontWeight:700,cursor:"pointer" }}>今日に戻る</button>
+            <button onClick={()=>navToDate(today)} style={{ fontSize:13,padding:"5px 10px",borderRadius:10,border:"none",background:T.ac,color:"white",fontWeight:700,cursor:"pointer" }}>今日に戻る</button>
           </div>}
 
           <div style={{ background:T.cBg,borderRadius:24,padding:"22px 18px",boxShadow:"0 2px 16px rgba(0,0,0,0.06)",marginBottom:16,transition:"background 0.4s" }}>
@@ -396,14 +405,15 @@ export default function HealthTracker() {
             <div style={{ fontSize:13,color:T.sT,marginBottom:10 }}>▲▼ or 数値タップで入力（タップ時クリア）</div>
             <div style={{ display:"flex",alignItems:"center",gap:10,marginBottom:12 }}>
               <span style={{ fontSize:15,fontWeight:600,color:T.sT }}>⏰ 測定時刻</span>
-              <input type="time" value={mTime} onChange={e=>sMTime(e.target.value)} onBlur={e=>{
-                const v=e.target.value; if(!v)return;
+              <input type="time" value={mTime} onChange={e=>{
+                const v=e.target.value; sMTime(v); if(!v)return;
                 const h=parseInt(v.split(":")[0]);
                 const shouldBe=(h>=4&&h<16)?"am":"pm";
                 if(shouldBe!==slot){
                   const msg=shouldBe==="am"?"朝モードに切り替えますか？":"夜モードに切り替えますか？";
-                  if(window.confirm(`⏰ 時刻が${v}です。${msg}`)) swSlot(shouldBe);
-              } }} style value={mTime} onChange={e=>sMTime(e.target.value)} style={{ fontSize:18,fontWeight:700,padding:"5px 10px",borderRadius:10,border:`2px solid ${T.bC}`,outline:"none",background:T.iBg,fontFamily:"'Noto Sans JP',sans-serif",color:T.cTx }}/>
+                  if(window.confirm(`⏰ 時刻が${v}です。${msg}`)) setSlot(shouldBe);
+                }
+              }} style={{ fontSize:18,fontWeight:700,padding:"5px 10px",borderRadius:10,border:`2px solid ${T.bC}`,outline:"none",background:T.iBg,fontFamily:"'Noto Sans JP',sans-serif",color:T.cTx }}/>
             </div>
             <div style={{ textAlign:"center",marginBottom:12,padding:"7px 12px",borderRadius:12,background:lv.bg }}>
               <span style={{ fontSize:17,fontWeight:800,color:lv.color }}>{lv.text}</span>
@@ -440,7 +450,7 @@ export default function HealthTracker() {
           </div>
         </>}
 
-        {tab==="calendar"&&<CalView records={data.records} onTap={d=>{swDate(d);sTab("today");}}/>}
+        {tab==="calendar"&&<CalView records={data.records} onTap={d=>{navToDate(d);sTab("today");}}/>}
 
         {tab==="chart"&&<>
           <div style={{ background:"white",borderRadius:24,padding:"16px 14px",boxShadow:"0 2px 16px rgba(0,0,0,0.06)",marginBottom:14 }}>
@@ -483,7 +493,7 @@ export default function HealthTracker() {
             return <div key={date} style={{ padding:"12px 14px",marginBottom:8,borderRadius:14,background:"#f8f9fa",border:isD?"2px solid #4caf50":"2px solid transparent" }}>
               <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6 }}>
                 <span style={{ fontSize:17,fontWeight:700,color:"#333" }}>{fmtFull(date)}{isD&&<span style={{ fontSize:11,background:"#e8f5e9",color:"#2e7d32",padding:"2px 6px",borderRadius:6,marginLeft:6,fontWeight:700 }}>今日</span>}</span>
-                <button onClick={()=>{swDate(date);sTab("today");}} style={{ fontSize:12,padding:"4px 10px",borderRadius:8,border:"2px solid #2e7d32",background:"white",color:"#2e7d32",cursor:"pointer",fontWeight:700 }}>✏️</button>
+                <button onClick={()=>{navToDate(date);sTab("today");}} style={{ fontSize:12,padding:"4px 10px",borderRadius:8,border:"2px solid #2e7d32",background:"white",color:"#2e7d32",cursor:"pointer",fontWeight:700 }}>✏️</button>
               </div>
               <BR sl="am" label="朝" icon="☀️"/><BR sl="pm" label="夜" icon="🌙"/>
               <div style={{ display:"flex",gap:4,flexWrap:"wrap",alignItems:"center",marginBottom:rec.memo?4:0 }}>
@@ -498,7 +508,7 @@ export default function HealthTracker() {
               <tbody>{hDates.map((date,i)=>{
                 const rec=data.records[date],am=rec.am,pm=rec.pm;
                 const mc=data.medications.filter(m=>rec.meds?.[m]).length,mt=data.medications.length;
-                return <tr key={date} onClick={()=>{swDate(date);sTab("today");}} style={{ background:i%2?"#fafafa":"white",cursor:"pointer" }}>
+                return <tr key={date} onClick={()=>{navToDate(date);sTab("today");}} style={{ background:i%2?"#fafafa":"white",cursor:"pointer" }}>
                   <td style={{ padding:"7px 4px",textAlign:"center",fontWeight:600,whiteSpace:"nowrap" }}>{fmtCompact(date)}</td>
                   <td style={{ padding:"7px 4px",textAlign:"center",fontWeight:700 }}>{am?<><span style={{color:"#e53935"}}>{am.systolic}</span>/<span style={{color:"#1e88e5"}}>{am.diastolic}</span>{am.pulse>0&&<>/<span style={{color:"#009688"}}>{am.pulse}</span></>}</>:<span style={{color:"#ddd"}}>—</span>}</td>
                   <td style={{ padding:"7px 4px",textAlign:"center",fontWeight:700 }}>{pm?<><span style={{color:"#e53935"}}>{pm.systolic}</span>/<span style={{color:"#1e88e5"}}>{pm.diastolic}</span>{pm.pulse>0&&<>/<span style={{color:"#009688"}}>{pm.pulse}</span></>}</>:<span style={{color:"#ddd"}}>—</span>}</td>
